@@ -34,8 +34,8 @@ This project is our contribution to advancing public understanding of space comm
 Follow the steps below to set up and run the project locally:
 
 ### 1. Clone the Repository
-git clone https://github.com/your-username/your-repo-name.git
-cd your-repo-name
+git clone [https://github.com/your-username/your-repo-name.git](https://github.com/EanKotadia/M2E_project/tree/main)
+cd M2E_project
 ### 2. Set Up a Virtual Environment (Recommended)
 python -m venv venv
 source venv/bin/activate   # On Windows use: venv\Scripts\activate
