@@ -68,18 +68,17 @@
 </head>
 
 <body>
-
     <nav class="navbar">
         <div class="nav-container">
             <div class="nav-brand">🚀 M2E-Link</div>
             <div class="nav-menu">
-                <a href="{{ url_for('index') }}">Mission</a>
-                <a href="{{ url_for('logs') }}">Logs</a>
-                <a href="{{ url_for('about') }}">About</a>
+                <a href="/">Mission</a>
+                <a href="/logs">Logs</a>
+                <a href="/about">About</a>
+                <a href="/projects">Projects</a>
             </div>
         </div>
     </nav>
-
     <main class="main-wrapper">
         {% block body %}{% endblock %}
     </main>
