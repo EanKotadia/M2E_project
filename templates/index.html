@@ -1,0 +1,292 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+    #space-container {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background-color: #000814;
+        border: 2px solid #0ff;
+        border-radius: 12px;
+        overflow: hidden;
+    }
+
+    .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: #fff;
+        border-radius: 50%;
+        opacity: .5;
+    }
+
+    .planet {
+        position: absolute;
+        border-radius: 50%;
+        background-size: cover;
+        background-position: center;
+        box-shadow: 0 0 25px rgba(0, 255, 255, 0.3);
+    }
+
+    .mars {
+        width: 120px;
+        height: 120px;
+        top: 10%;
+        right: 10%;
+        background-image: url("/static/images/mars.jpeg");
+    }
+
+    .earth {
+        width: 100px;
+        height: 100px;
+        bottom: 10%;
+        left: 10%;
+        background-image: url("/static/images/earth.jpeg");
+    }
+
+    .satellite {
+        position: absolute;
+        width: 40px;
+        height: 40px;
+        background: url("/static/images/satellite.png") no-repeat center center;
+        background-size: contain;
+        filter: drop-shadow(0 0 3px #0ff);
+    }
+
+    .data-packet {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background: #0ff;
+        border-radius: 50%;
+        box-shadow: 0 0 10px #0ff;
+        opacity: 0;
+    }
+
+    .info-panel {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        background: rgba(0, 10, 20, 0.9);
+        color: #0ff;
+        padding: 18px 22px;
+        border: 1px solid #0ff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+        font-size: 14px;
+        z-index: 10;
+    }
+
+    .info-panel h3 {
+        margin: 0 0 5px 0;
+        font-size: 16px;
+        color: #0ff;
+        letter-spacing: 1px;
+        text-shadow: 0 0 5px #0ff;
+    }
+
+    .info-panel span {
+        display: block;
+        margin: 3px 0;
+    }
+
+    .signal-wave {
+        position: absolute;
+        border: 2px solid rgba(0, 255, 204, .4);
+        border-radius: 50%;
+        pointer-events: none;
+        animation: pulse 1s ease-out forwards;
+    }
+
+    @keyframes pulse {
+        from {
+            width: 0;
+            height: 0;
+            opacity: 1;
+        }
+
+        to {
+            width: 100px;
+            height: 100px;
+            opacity: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div id="space-container">
+    <div class="planet mars" id="mars"></div>
+    <div class="planet earth" id="earth"></div>
+
+    <div class="satellite" id="sat3" style="top: 30%; left: 70%;"></div>
+    <div class="satellite" id="sat2" style="top: 45%; left: 50%;"></div>
+    <div class="satellite" id="sat1" style="top: 60%; left: 30%;"></div>
+
+    <div class="info-panel">
+        <h3>Mission: M2E-Link</h3>
+        <span><strong>ID:</strong> MARS-0425</span>
+        <span><strong>Status:</strong> <span id="status">Initializing...</span></span>
+        <span><strong>Phase:</strong> Transmission Relay</span>
+        <span><strong>Time:</strong> <span id="clock">--:--:--</span></span>
+    </div>
+</div>
+
+<audio id="beep" src="/static/sfx/beep.mp3" preload="auto"></audio>
+
+<script>
+    const container = document.getElementById('space-container');
+    const beep = document.getElementById('beep');
+
+    // Starfield
+    for (let i = 0; i < 200; i++) {
+        const s = document.createElement('div');
+        s.className = 'star';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.opacity = 0.2 + Math.random() * 0.6;
+        container.appendChild(s);
+    }
+
+    const mars = document.getElementById('mars');
+    const earth = document.getElementById('earth');
+    const sat1 = document.getElementById('sat1');
+    const sat2 = document.getElementById('sat2');
+    const sat3 = document.getElementById('sat3');
+    const status = document.getElementById('status');
+
+    function getPos(el) {
+        const r = el.getBoundingClientRect();
+        const c = container.getBoundingClientRect();
+        return {
+            x: r.left + r.width / 2 - c.left,
+            y: r.top + r.height / 2 - c.top
+        };
+    }
+
+    function wave(x, y) {
+        const w = document.createElement('div');
+        w.className = 'signal-wave';
+        w.style.left = (x - 50) + 'px';
+        w.style.top = (y - 50) + 'px';
+        container.appendChild(w);
+        beep.currentTime = 0;
+        beep.play();
+        setTimeout(() => w.remove(), 1000);
+    }
+
+    const colors = ["#0ff", "#ff0", "#f0f", "#0f0", "#f30"];
+
+    function animate(from, to, duration, colorIndex) {
+        return new Promise(res => {
+            const p = document.createElement('div');
+            p.className = 'data-packet';
+            p.style.background = colors[colorIndex % colors.length];
+            p.style.boxShadow = `0 0 10px ${colors[colorIndex % colors.length]}`;
+            container.appendChild(p);
+
+            const f = getPos(from);
+            const t = getPos(to);
+            p.style.left = f.x + 'px';
+            p.style.top = f.y + 'px';
+            p.style.opacity = 1;
+
+            const dx = t.x - f.x;
+            const dy = t.y - f.y;
+            p.style.transition = `transform ${duration}ms ease`;
+            p.style.transform = `translate(${dx}px,${dy}px)`;
+
+            setTimeout(() => {
+                wave(t.x, t.y);
+                p.remove();
+                res();
+            }, duration);
+        });
+    }
+
+    async function run() {
+        let hop = 0;
+        status.textContent = 'Mars → Sat3';
+        await animate(mars, sat3, 1200, hop++);
+
+        status.textContent = 'Sat3 → Sat2';
+        await animate(sat3, sat2, 800, hop++);
+
+        status.textContent = 'Sat2 → Sat1';
+        await animate(sat2, sat1, 800, hop++);
+
+        status.textContent = 'Sat1 → Earth';
+        await animate(sat1, earth, 1000, hop++);
+
+        status.textContent = 'Earth → Sat1';
+        await animate(earth, sat1, 1000, hop++);
+
+        status.textContent = 'Sat1 → Sat2';
+        await animate(sat1, sat2, 800, hop++);
+
+        status.textContent = 'Sat2 → Sat3';
+        await animate(sat2, sat3, 800, hop++);
+
+        status.textContent = 'Sat3 → Mars';
+        await animate(sat3, mars, 1200, hop++);
+
+        // 🎆 Show mission complete
+        status.innerHTML = `<span style="color:#0f0; text-shadow: 0 0 10px #0f0;">✔ Mission Complete</span>`;
+    }
+
+    run();
+
+    // ⏰ Live Clock
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').textContent = now.toLocaleTimeString();
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+</script>
+<!-- 📡 Quantum Comm Section -->
+<div class="layout-wrapper" style="margin-top: 60px; font-family: 'Orbitron', sans-serif; color: #0ff;">
+    <h2 style="text-align: center; font-size: 1.8rem; text-shadow: 0 0 10px #0ff;">Quantum Satellite Communication
+    </h2>
+
+    <div class="info-block"
+        style="background: rgba(0, 10, 20, 0.8); padding: 24px; border-radius: 12px; border: 1px solid #0ff; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); margin-top: 20px;">
+        <p style="line-height: 1.7; font-size: 1rem;">
+            In our inter-satellite mission, we utilize <strong>quantum bits (qubits)</strong> to transmit data packets
+            with unprecedented efficiency and security.
+            Quantum Key Distribution (QKD) enables <em>unbreakable encryption</em>, making our communication protocol
+            immune to interception—even by future quantum computers.
+            By deploying QKD through low-earth orbit satellites, we reduce latency, energy consumption, and maximize
+            integrity across long-distance space relays.
+        </p>
+        <div style="text-align: center; margin-top: 20px;">
+            <img src="/static/images/quantum-network-placeholder.png" alt="Quantum Network Diagram"
+                style="max-width: 100%; border: 2px solid #0ff; border-radius: 8px;">
+            <p style="margin-top: 8px; font-size: 0.9rem;">[ Quantum Satellite Link Schematic Placeholder ]</p>
+        </div>
+    </div>
+
+    <!-- 🧭 Timeline -->
+    <h3 style="margin-top: 60px; font-size: 1.5rem; text-align: center; text-shadow: 0 0 6px #0ff;">Hackathon
+        Development Timeline</h3>
+    <div class="timeline" style="margin-top: 30px; border-left: 2px solid #00f2f2; padding-left: 20px;">
+        <div class="event" style="margin-bottom: 25px;">
+            <h4 style="margin-bottom: 4px; font-size: 1.2rem; color: #00f2f2;">Day 1: Ideation</h4>
+            <p style="font-size: 0.95rem;">Identified the problem space: secure, efficient space communication.
+                Researched QKD & satellite routing protocols.</p>
+        </div>
+        <div class="event" style="margin-bottom: 25px;">
+            <h4 style="margin-bottom: 4px; font-size: 1.2rem; color: #00f2f2;">Day 2: Visualization & Architecture</h4>
+            <p style="font-size: 0.95rem;">Built Mars-Earth animation using Three.js-like effects. Defined relay hops &
+                quantum transmission logic.</p>
+        </div>
+        <div class="event" style="margin-bottom: 25px;">
+            <h4 style="margin-bottom: 4px; font-size: 1.2rem; color: #00f2f2;">Day 3: UI + Final Presentation</h4>
+            <p style="font-size: 0.95rem;">Polished UI with space mission dashboard. Added educational panels, live
+                status, and mission clock.</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
