@@ -5,6 +5,8 @@ By *Ean Kotadia & Vihaan Vashistha – Class 10 E* | M2E-Link Hackathon
 
 > Disclaimer: This was vibe coded and a proof of concept rather than purely functional.
 
+## Use Now: [M2E-Link](https://m2-e-project.vercel.app)
+
 ---
 
 ## Project Overview
