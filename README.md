@@ -1,8 +1,9 @@
-# M2E-Link
-
+# Brain Dump
 **M2E-Link** is a simulation demonstrating how quantum bits (qbits) could enable secure, faster, and theoretically unbreakable communication between Mars rovers, satellites, and Earth.
-
 Developed during the **SpaceHack: Space Data Challenge** by **Ean Kotadia** and **Vihaan Vashistha**, 10th-grade students passionate about science and innovation.
+By *Ean Kotadia & Vihaan Vashistha – Class 10 E* | M2E-Link Hackathon
+
+> Disclaimer: This was vibe coded and a proof of concept rather than purely functional.
 
 ---
 
